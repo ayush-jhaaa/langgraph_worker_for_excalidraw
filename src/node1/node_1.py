@@ -1,26 +1,35 @@
-import os
-from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
+
+from langchain_openrouter import ChatOpenRouter
 from langchain_core.prompts import ChatPromptTemplate
+
 from rich.console import Console
 from rich import print_json
+
+from src.node1.system_instruction import system_instruction
+
+# _________________________________________
 import json,re
-from src.node1.system_prompt import system_instruction
+
 def parse_json_from_llm(s: str):
     # remove ```json ... ``` or ``` ... ``` if present
     cleaned = re.sub(r"^```(?:json)?|```$", "", s.strip(), flags=re.MULTILINE).strip()
     return json.loads(cleaned)
+# _________________________________________
+import os
+from dotenv import load_dotenv
 
 load_dotenv()
-API_KEY = os.getenv("GEMINI_API_KEY")
+API_KEY = os.getenv("OPENROUTER_API_KEY")
+# _________________________________________
 
 console = Console()
-
-llm = ChatGoogleGenerativeAI(
-    model = "gemini-2.5-flash",
-    google_api_key = API_KEY
+llm = ChatOpenRouter(
+    model = "qwen/qwen3-next-80b-a3b-instruct",
+    temperature = 0,
+    api_key = API_KEY,
 )
-def node_1_generator(state):
+# _________________________________________
+def genesis(state):
     user_prompt = state["user_input"]
     prompt_template = ChatPromptTemplate.from_messages([
         ("system", system_instruction),

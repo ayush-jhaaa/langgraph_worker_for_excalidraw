@@ -1,6 +1,6 @@
 from langchain.output_parsers import PydanticOutputParser
 # from pydantic import 
-
+from pydantic import ValidationError
 ##########
 from src.node2.models.shape_model import ShapeModel
 from src.node2.models.shape_text_model import ShapeTextModel
@@ -48,16 +48,36 @@ test_cases = [
     {"type": "text"},
 ]
 
-def node_2_validator(state):
+def sentinel(state):
     json_array = state["generated_json"]
-    for json in json_array:
-        model_class = validator_selector(json)
-        validated_obj = model_class.model_validate(json)
-        # print(validator)
-    state["is_valid"] = True
+    validation_errors = {}
+    validated_json = []
+
+    for idx,json in enumerate(json_array):
+        try:
+            model_class = validator_selector(json)
+            validated_obj = model_class.model_validate(json)
+            validated_json.append(json)
+
+        except ValidationError as e:
+            validation_errors[idx] = e.errors()
+
+
+        if validation_errors:
+            state["is_valid"] = False
+        else:
+            state["is_valid"] = True
+            state["validated_json"] = json_array
+            
+        state["validation_errors"] = []
+
+
     print('node 2 running')
     return state
 
-init_state = {}
+
+init_state = {
+    "generated_json" : test_cases
+}
 if __name__ == "__main__":
     node_2_validator(init_state)
