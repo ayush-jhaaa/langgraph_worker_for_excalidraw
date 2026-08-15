@@ -40,8 +40,17 @@ graph.add_node("polisher", polisher)
 graph.add_node("regen", regen)
 
 
-# connect nodes
-graph.set_entry_point("generator")
-graph.add_edge("generator", "validator")
-graph.add_edge("validator", "corrector")
-graph.add_edge("corrector", END)
+# connect nodes and add logics
+
+graph.set_entry_point("genesis")
+graph.add_edge("genesis", "sentinel")
+graph.add_edge("regen", "sentinel")
+
+graph.add_conditional_edges("sentinel",
+    lambda state: "valid" if state.get("is_valid") else "invalid",
+    {
+        "valid": "polisher",
+        "invalid": "regen",
+    },)
+
+graph.add_edge("polisher", END)
