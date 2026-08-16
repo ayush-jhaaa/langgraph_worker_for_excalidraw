@@ -6,7 +6,7 @@ from rich.console import Console
 from rich import print_json
 
 from src.node1.system_instruction import system_instruction
-
+from src.node1.converter import converter
 # _________________________________________
 import json,re
 
@@ -29,6 +29,7 @@ llm = ChatOpenRouter(
     api_key = API_KEY,
 )
 # _________________________________________
+# from 
 def genesis(state):
     user_prompt = state["user_input"]
     prompt_template = ChatPromptTemplate.from_messages([
@@ -41,15 +42,20 @@ def genesis(state):
     
     result = response.content
 
-    console.print(type(result))
-    data = parse_json_from_llm(result)
-    console.print(type(data))
-    # Store in state
-    state["generated_json"] = data
-    cleaned = re.sub(r"^```(?:json)?|```$", "", result.strip(), flags=re.MULTILINE).strip()
-    print_json(cleaned)
+    # console.print(type(result))
+    # console.print(repr(result))
 
-    print("node_1 running succssfully")
+    data = parse_json_from_llm(result)
+    # console.print(type(data))
+    # Store in state
+    state["generated_json"] = converter(data)
+
+    print("genesis running succssfully")
+    state["coming_from"] = "genesis"
+
+    # cleaned = re.sub(r"^```(?:json)?|```$", "", result.strip(), flags=re.MULTILINE).strip()
+    # print(data)
+    # console.print(converter(data)) 
     return state
 
 # Test run then i get from server
@@ -59,5 +65,5 @@ if __name__ == "__main__":
     # initialize the state then print the result
     init_state = {"user_input" : input_prompt}
 
-    state_after_node1 = node_1_generator(init_state)
+    state_after_node1 = genesis(init_state)
     # print(state_after_node1['generated_json'][0]['type'])

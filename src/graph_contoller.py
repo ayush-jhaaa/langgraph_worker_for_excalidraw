@@ -1,3 +1,4 @@
+from collections import defaultdict
 
 from src.node1.node_1 import genesis
 from src.node2.node_2 import sentinel
@@ -13,9 +14,10 @@ from langgraph.graph.message import add_messages
 
 class plan(TypedDict, total=False):
     messages: Annotated[list, add_messages]
+    coming_from : str
     # for node_1
     user_input : str
-    generated_json : List[dict]
+    generated_json : dict[int,dict]
 
     # for node_2
     validation_errors : dict # pydantic.ValidationErrors
@@ -24,11 +26,11 @@ class plan(TypedDict, total=False):
     retry_count : int 
     max_retries : int # mostly 3
 
-    valid_json : List[dict]
-    invalid_json : List[dict]
+    valid_json : dict[int,dict]
+    invalid_json : dict[int,dict]
 
     # for node_3
-    corrected_json : List[dict]
+    corrected_json : dict[int,dict]
 
 # ________________________________________
 
